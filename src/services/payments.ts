@@ -1,0 +1,141 @@
+/**
+ * Payments Service
+ */
+
+import { PrismaClient } from '@prisma/client';
+import { CreatePaymentDto } from '../dtos/payments.dto';
+import { InstallmentStatus } from '../constants/enums';
+
+export class PaymentsService {
+  constructor(private prisma: PrismaClient) {}
+
+  async findAll(filters: {
+    page?: number;
+    limit?: number;
+    clientId?: number;
+    operationId?: bigint;
+    from?: Date;
+    to?: Date;
+  }) {
+    const { page = 1, limit = 20, clientId, operationId, from, to } = filters;
+    const skip = (page - 1) * limit;
+
+    const where: Record<string, unknown> = {};
+    if (clientId) where.clientId = clientId;
+    if (operationId) where.operationId = operationId;
+    if (from || to) {
+      where.paidAt = {};
+      if (from) where.paidAt.gte = from;
+      if (to) where.paidAt.lte = to;
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.payment.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          client: true,
+          operation: {
+            include: {
+              account: true,
+            },
+          },
+          installment: true,
+        },
+        orderBy: { paidAt: 'desc' },
+      }),
+      this.prisma.payment.count({ where }),
+    ]);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async findById(id: bigint) {
+    return this.prisma.payment.findUnique({
+      where: { id },
+      include: {
+        client: true,
+        operation: {
+          include: {
+            account: true,
+            client: true,
+          },
+        },
+        installment: true,
+      },
+    });
+  }
+
+  async create(dto: CreatePaymentDto) {
+    const operationId = typeof dto.operationId === 'string' 
+      ? BigInt(dto.operationId) 
+      : BigInt(dto.operationId);
+    const installmentId = dto.installmentId 
+      ? (typeof dto.installmentId === 'string' 
+          ? BigInt(dto.installmentId) 
+          : BigInt(dto.installmentId))
+      : null;
+    const amount = typeof dto.amount === 'string' 
+      ? parseFloat(dto.amount) 
+      : dto.amount;
+    const paidAt = dto.paidAt 
+      ? (typeof dto.paidAt === 'string' ? new Date(dto.paidAt) : dto.paidAt)
+      : new Date();
+
+    const payment = await this.prisma.payment.create({
+      data: {
+        clientId: dto.clientId,
+        operationId: operationId,
+        installmentId: installmentId,
+        amount: amount,
+        currency: dto.currency || 'BRL',
+        paidAt: paidAt,
+        method: dto.method,
+        reference: dto.reference,
+        meta: dto.meta,
+      },
+      include: {
+        client: true,
+        operation: true,
+        installment: true,
+      },
+    });
+
+    // Update installment status if linked
+    if (installmentId) {
+      const installment = await this.prisma.installment.findUnique({
+        where: { id: installmentId },
+        include: { payments: true },
+      });
+
+      if (installment) {
+        const totalPaid = installment.payments.reduce(
+          (sum, p) => sum + Number(p.amount),
+          0
+        );
+
+        if (totalPaid >= Number(installment.amount)) {
+          await this.prisma.installment.update({
+            where: { id: installmentId },
+            data: {
+              status: InstallmentStatus.PAID,
+              paidAt: paidAt,
+            },
+          });
+        }
+      }
+    }
+
+    return payment;
+  }
+}
+

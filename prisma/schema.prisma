@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+// Alteração: Operation.id, Installment.id e Payment.id -> BigInt
+// Todas as FKs que referenciam essas chaves também foram ajustadas para BigInt.
+// Campos permanecem em camelCase com @map para snake_case no DB.
+
+model PlatformUser {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String?  @map("password_hash")
+  role         String   @default("agent")
+  twoFa        Boolean  @default(false) @map("two_fa")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  accounts      Account[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+
+  @@map("platform_users")
+}
+
+model Account {
+  id         Int      @id @default(autoincrement())
+  name       String
+  phone      String?
+  email      String
+  document   String?
+  status     String   @default("ACTIVE")
+  currency   String   @default("BRL")
+  plan       String?
+  meta       Json?
+  ownerId    Int?     @map("owner_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  owner      PlatformUser? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  address    Address?
+  clients    Client[]
+  operations Operation[]
+  settings   Setting[]
+
+  @@map("accounts")
+}
+
+model Address {
+  id           Int     @id @default(autoincrement())
+  street       String?
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+  country      String? @default("BR")
+  zip          String?
+  accountId    Int?     @map("account_id")
+  clientId     Int?     @map("client_id")
+  resourceId   Int?     @map("resource_id")
+
+  account   Account?  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  client    Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  resource  Resource? @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+model Client {
+  id         Int      @id @default(autoincrement())
+  accountId  Int      @map("account_id")
+  name       String
+  phone      String?
+  email      String?
+  meta       Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  address     Address?
+  operations  Operation[]
+  payments    Payment[]
+  photos      ClientPhoto[]
+
+  @@map("clients")
+}
+
+model ClientPhoto {
+  id        Int      @id @default(autoincrement())
+  clientId  Int      @map("client_id")
+  url       String
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("client_photos")
+}
+
+// ------------ OPERATION (id -> BigInt) ------------
+model Operation {
+  id              BigInt    @id @default(autoincrement()) @db.BigInt
+  accountId       Int       @map("account_id")
+  clientId        Int       @map("client_id")
+  type            String
+  title           String?
+  description     String?
+  principalAmount Decimal    @db.Numeric(30, 2) @map("principal_amount")
+  currency        String     @default("BRL")
+  startDate       DateTime   @map("start_date")
+  dueDate         DateTime?  @map("due_date")
+  frequency       String?
+  interestRate    Decimal?   @db.Numeric(10, 4) @map("interest_rate")
+  entryAmount     Decimal?   @db.Numeric(30, 2) @map("entry_amount")
+  installments    Int?
+  depositAmount   Decimal?   @db.Numeric(30, 2) @map("deposit_amount")
+  collateralMeta  Json?      @map("collateral_meta")
+  meta            Json?
+  status          String?
+  resourceId      Int?       @map("resource_id")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  account          Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  client           Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  installmentsList Installment[] @relation("OperationInstallments")
+  photos           OperationPhoto[]
+  resource         Resource?     @relation(fields: [resourceId], references: [id])
+  alerts           Alert[]
+
+  @@map("operations")
+}
+
+// OperationPhoto references operation.id (BigInt)
+model OperationPhoto {
+  id           Int      @id @default(autoincrement())
+  operationId  BigInt   @map("operation_id") @db.BigInt
+  url          String
+  meta         Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  operation    Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+
+  @@map("operation_photos")
+}
+
+// ------------ INSTALLMENT (id -> BigInt) ------------
+model Installment {
+  id             BigInt    @id @default(autoincrement()) @db.BigInt
+  operationId    BigInt    @map("operation_id") @db.BigInt
+  dueDate        DateTime  @map("due_date")
+  amount         Decimal   @db.Numeric(30, 2)
+  principal      Decimal?  @db.Numeric(30, 2)
+  interest       Decimal?  @db.Numeric(30, 2)
+  status         String    @default("PENDING")
+  paidAt         DateTime? @map("paid_at")
+  lateFeePercent Decimal?  @db.Numeric(10, 4) @map("late_fee_percent")
+  notes          String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  operation      Operation @relation("OperationInstallments", fields: [operationId], references: [id], onDelete: Cascade)
+  payments       Payment[] 
+
+  @@map("installments")
+}
+
+// ------------ PAYMENT (id -> BigInt) ------------
+model Payment {
+  id            BigInt     @id @default(autoincrement()) @db.BigInt
+  clientId      Int        @map("client_id")
+  installmentId BigInt?    @map("installment_id") @db.BigInt
+  operationId   BigInt     @map("operation_id") @db.BigInt
+  amount        Decimal    @db.Numeric(30, 2)
+  currency      String     @default("BRL")
+  paidAt        DateTime   @default(now()) @map("paid_at")
+  method        String?
+  reference     String?
+  meta          Json?
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  installment  Installment? @relation(fields: [installmentId], references: [id], onDelete: SetNull)
+  operation    Operation    @relation(fields: [operationId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  accountId   Int      @map("account_id")
+  type        String
+  title       String
+  description String?
+  addressId   Int?     @map("address_id")
+  photos      Json?
+  meta        Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  address     Address? @relation(fields: [addressId], references: [id])
+  operations  Operation[]
+
+  @@map("resources")
+}
+
+model Alert {
+  id          Int      @id @default(autoincrement())
+  operationId BigInt   @map("operation_id") @db.BigInt
+  type        String
+  sendAt      DateTime? @map("send_at")
+  template    String?
+  enabled     Boolean   @default(true)
+  meta        Json?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  operation   Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  title       String
+  body        String
+  channel     String?
+  sentAt      DateTime? @map("sent_at")
+  read        Boolean   @default(false)
+  meta        Json?
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user        PlatformUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Setting {
+  id         Int      @id @default(autoincrement())
+  accountId  Int?     @map("account_id")
+  key        String
+  value      Json?
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  account    Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, key])
+  @@map("settings")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  action    String
+  entity    String?
+  entityId  String?  @map("entity_id")
+  before    Json?
+  after     Json?
+  ip        String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      PlatformUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}

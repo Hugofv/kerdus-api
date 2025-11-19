@@ -1,0 +1,7 @@
+**/node_modules
+dist/
+**/**/*.log
+.env
+prisma/shadow-db.db
+.DS_Store
+**/**/.DS_Store
