@@ -8,7 +8,11 @@
     "build": "tsc",
     "prisma": "prisma",
     "start": "node dist/index.js",
-    "scheduler": "node dist/scheduler/index.js"
+    "scheduler": "node dist/scheduler/index.js",
+    "seed": "npx prisma db seed"
+  },
+  "prisma": {
+    "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
   },
   "nodemonConfig": {
     "watch": [
