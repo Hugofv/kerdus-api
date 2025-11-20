@@ -15,6 +15,8 @@ import { loadContainer } from './container';
 import routes from './routes';
 import { NodeEnvs } from './common/misc';
 import { errorMiddleware } from './middlewares/error.middleware';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 
 // **** Variables **** //
 
@@ -42,6 +44,12 @@ if (process.env.NODE_ENV === NodeEnvs.Dev.valueOf()) {
 if (process.env.NODE_ENV === NodeEnvs.Production.valueOf()) {
   app.use(helmet());
 }
+
+// Swagger/OpenAPI Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Operations Management API - Documentation',
+}));
 
 // Add APIs, must be after middleware
 loadContainer(app);

@@ -38,7 +38,7 @@ export class ResourcesController extends BaseController {
 
   async create(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const resource = await this.resourcesService.create(req.body);
+    const resource = await this.resourcesService.create(req.body as any);
     this.created(serializeBigInt(resource));
   }
 

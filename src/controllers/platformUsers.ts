@@ -38,14 +38,14 @@ export class PlatformUsersController extends BaseController {
 
   async create(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const user = await this.platformUsersService.create(req.body);
+    const user = await this.platformUsersService.create(req.body as any);
     this.created(serializeBigInt(user));
   }
 
   async update(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
     const id = Number(req.params.id);
-    const user = await this.platformUsersService.update(id, req.body);
+    const user = await this.platformUsersService.update(id, req.body as any);
     this.ok(serializeBigInt(user));
   }
 

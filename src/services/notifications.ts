@@ -4,6 +4,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { NotificationChannel } from '../constants/enums';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export interface CreateNotificationDto {
   userId: number;
@@ -92,7 +93,7 @@ export class NotificationsService {
         title: dto.title,
         body: dto.body,
         channel: dto.channel,
-        meta: dto.meta,
+        meta: dto.meta as unknown as InputJsonValue,
         sentAt: new Date(), // TODO: Set based on provider response
       },
       include: {
@@ -114,7 +115,7 @@ export class NotificationsService {
         body: dto.body,
         read: dto.read,
         sentAt: dto.sentAt,
-        meta: dto.meta,
+        meta: dto.meta as unknown as InputJsonValue,
       },
       include: {
         user: true,

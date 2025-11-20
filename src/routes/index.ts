@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import authRouter from './auth.routes';
 import accountsRouter from './accounts.routes';
 import clientsRouter from './clients.routes';
 import operationsRouter from './operations.routes';
@@ -12,6 +13,10 @@ import platformUsersRouter from './platformUsers.routes';
 
 const routes = Router();
 
+// Public routes
+routes.use('/auth', authRouter);
+
+// Protected routes (require authentication)
 routes.use('/accounts', accountsRouter);
 routes.use('/clients', clientsRouter);
 routes.use('/operations', operationsRouter);

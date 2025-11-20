@@ -3,6 +3,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export interface CreateAlertDto {
   operationId: bigint;
@@ -91,7 +92,7 @@ export class AlertsService {
         sendAt: dto.sendAt,
         template: dto.template,
         enabled: dto.enabled !== undefined ? dto.enabled : true,
-        meta: dto.meta,
+        meta: dto.meta as unknown as InputJsonValue,
       },
       include: {
         operation: true,
@@ -107,7 +108,7 @@ export class AlertsService {
         sendAt: dto.sendAt,
         template: dto.template,
         enabled: dto.enabled,
-        meta: dto.meta,
+        meta: dto.meta as unknown as InputJsonValue,
       },
       include: {
         operation: true,

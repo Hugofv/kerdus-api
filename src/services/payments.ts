@@ -9,6 +9,15 @@ import { InstallmentStatus } from '../constants/enums';
 export class PaymentsService {
   constructor(private prisma: PrismaClient) {}
 
+  // Type assertion helpers for Prisma models
+  private get payment() {
+    return (this.prisma as any).payment;
+  }
+
+  private get installment() {
+    return (this.prisma as any).installment;
+  }
+
   async findAll(filters: {
     page?: number;
     limit?: number;
@@ -20,7 +29,7 @@ export class PaymentsService {
     const { page = 1, limit = 20, clientId, operationId, from, to } = filters;
     const skip = (page - 1) * limit;
 
-    const where: Record<string, unknown> = {};
+    const where: any = {};
     if (clientId) where.clientId = clientId;
     if (operationId) where.operationId = operationId;
     if (from || to) {
@@ -30,7 +39,7 @@ export class PaymentsService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.payment.findMany({
+      this.payment.findMany({
         where,
         skip,
         take: limit,
@@ -45,7 +54,7 @@ export class PaymentsService {
         },
         orderBy: { paidAt: 'desc' },
       }),
-      this.prisma.payment.count({ where }),
+      this.payment.count({ where }),
     ]);
 
     return {
@@ -60,7 +69,7 @@ export class PaymentsService {
   }
 
   async findById(id: bigint) {
-    return this.prisma.payment.findUnique({
+    return this.payment.findUnique({
       where: { id },
       include: {
         client: true,
@@ -91,7 +100,7 @@ export class PaymentsService {
       ? (typeof dto.paidAt === 'string' ? new Date(dto.paidAt) : dto.paidAt)
       : new Date();
 
-    const payment = await this.prisma.payment.create({
+    const payment = await this.payment.create({
       data: {
         clientId: dto.clientId,
         operationId: operationId,
@@ -112,19 +121,19 @@ export class PaymentsService {
 
     // Update installment status if linked
     if (installmentId) {
-      const installment = await this.prisma.installment.findUnique({
+      const installment = await this.installment.findUnique({
         where: { id: installmentId },
         include: { payments: true },
       });
 
       if (installment) {
         const totalPaid = installment.payments.reduce(
-          (sum, p) => sum + Number(p.amount),
+          (sum: number, p: any) => sum + Number(p.amount),
           0
         );
 
         if (totalPaid >= Number(installment.amount)) {
-          await this.prisma.installment.update({
+          await this.installment.update({
             where: { id: installmentId },
             data: {
               status: InstallmentStatus.PAID,

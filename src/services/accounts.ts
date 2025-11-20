@@ -5,6 +5,7 @@
 import { PrismaClient } from '@prisma/client';
 import { CreateAccountDto, UpdateAccountDto } from '../dtos/accounts.dto';
 import { Currency } from '../constants/enums';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class AccountsService {
   constructor(private prisma: PrismaClient) {}
@@ -82,7 +83,7 @@ export class AccountsService {
         status: dto.status || 'ACTIVE',
         currency: dto.currency || Currency.BRL,
         plan: dto.plan,
-        meta: dto.meta,
+        meta: dto.meta as unknown as InputJsonValue,
         ownerId: dto.ownerId,
       },
       include: {
@@ -107,7 +108,7 @@ export class AccountsService {
         status: dto.status,
         currency: dto.currency,
         plan: dto.plan,
-        meta: dto.meta,
+        meta: dto.meta as unknown as InputJsonValue,
         ownerId: dto.ownerId,
       },
       include: {

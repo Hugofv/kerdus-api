@@ -1,9 +1,9 @@
 /**
  * Operations Controller Tests (Skeleton)
- * 
+ *
  * TODO: Install jest and @types/jest:
  * npm install --save-dev jest @types/jest ts-jest
- * 
+ *
  * Add to package.json:
  * "jest": {
  *   "preset": "ts-jest",

@@ -3,6 +3,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export interface CreateSettingDto {
   accountId?: number;
@@ -57,7 +58,7 @@ export class SettingsService {
     return this.prisma.setting.findUnique({
       where: {
         accountId_key: {
-          accountId: accountId || null,
+          accountId: accountId ?? 0,
           key,
         },
       },
@@ -72,7 +73,7 @@ export class SettingsService {
       data: {
         accountId: dto.accountId,
         key: dto.key,
-        value: dto.value,
+        value: dto.value as unknown as InputJsonValue,
       },
       include: {
         account: true,
@@ -84,12 +85,12 @@ export class SettingsService {
     return this.prisma.setting.update({
       where: {
         accountId_key: {
-          accountId: accountId || null,
+          accountId: accountId ?? 0,
           key,
         },
       },
       data: {
-        value: dto.value,
+        value: dto.value as unknown as InputJsonValue,
       },
       include: {
         account: true,
@@ -101,15 +102,15 @@ export class SettingsService {
     return this.prisma.setting.upsert({
       where: {
         accountId_key: {
-          accountId: accountId || null,
+          accountId: accountId ?? 0,
           key,
         },
       },
-      update: { value },
+      update: { value: value as unknown as InputJsonValue },
       create: {
-        accountId: accountId || null,
+        accountId: accountId ?? 0,
         key,
-        value,
+        value: value as unknown as InputJsonValue,
       },
       include: {
         account: true,
@@ -122,7 +123,7 @@ export class SettingsService {
     return this.prisma.setting.update({
       where: {
         accountId_key: {
-          accountId: accountId || null,
+          accountId: accountId ?? 0,
           key,
         },
       },

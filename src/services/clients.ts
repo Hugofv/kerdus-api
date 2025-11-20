@@ -4,6 +4,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { CreateClientDto, UpdateClientDto } from '../dtos/clients.dto';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class ClientsService {
   constructor(private prisma: PrismaClient) {}
@@ -78,7 +79,7 @@ export class ClientsService {
         name: dto.name,
         phone: dto.phone,
         email: dto.email,
-        meta: dto.meta,
+        meta: dto.meta as unknown as InputJsonValue,
       },
       include: {
         account: true,
@@ -94,7 +95,7 @@ export class ClientsService {
         name: dto.name,
         phone: dto.phone,
         email: dto.email,
-        meta: dto.meta,
+        meta: dto.meta as unknown as InputJsonValue,
       },
       include: {
         account: true,

@@ -4,6 +4,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { ResourceType } from '../constants/enums';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export interface CreateResourceDto {
   accountId: number;
@@ -90,8 +91,8 @@ export class ResourcesService {
         title: dto.title,
         description: dto.description,
         addressId: dto.addressId,
-        photos: dto.photos,
-        meta: dto.meta,
+        photos: dto.photos as unknown as InputJsonValue,
+        meta: dto.meta as unknown as InputJsonValue,
       },
       include: {
         account: true,
@@ -112,8 +113,8 @@ export class ResourcesService {
         title: dto.title,
         description: dto.description,
         addressId: dto.addressId,
-        photos: dto.photos,
-        meta: dto.meta,
+        photos: dto.photos as unknown as InputJsonValue,
+        meta: dto.meta as unknown as InputJsonValue,
       },
       include: {
         account: true,

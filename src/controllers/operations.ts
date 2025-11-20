@@ -34,7 +34,7 @@ export class OperationsController extends BaseController {
 
   async show(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const id = BigInt(req.params.id);
+    const id = BigInt(String(req.params.id));
     const operation = await this.operationsService.findById(id);
 
     if (!operation) {
@@ -47,28 +47,29 @@ export class OperationsController extends BaseController {
 
   async create(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const operation = await this.operationsService.create(req.body);
+    const operation = await this.operationsService.create(req.body as any);
     this.created(serializeBigInt(operation));
   }
 
   async update(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const id = BigInt(req.params.id);
-    const operation = await this.operationsService.update(id, req.body);
+    const id = BigInt(String(req.params.id));
+    const operation = await this.operationsService.update(id, req.body as any);
     this.ok(serializeBigInt(operation));
   }
 
   async delete(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const id = BigInt(req.params.id);
+    const id = BigInt(String(req.params.id));
     await this.operationsService.delete(id);
     this.noContent();
   }
 
   async registerPayment(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const operationId = BigInt(req.params.id);
-    const clientId = req.user?.accountId || req.body.clientId;
+    const operationId = BigInt(String(req.params.id));
+    const body = req.body as any;
+    const clientId = req.user?.accountId || body.clientId;
     
     if (!clientId) {
       this.badRequest('Client ID is required', 'VALIDATION_ERROR');
@@ -76,12 +77,12 @@ export class OperationsController extends BaseController {
     }
 
     const payment = await this.operationsService.registerPayment(operationId, {
-      amount: req.body.amount,
-      method: req.body.method,
-      installmentId: req.body.installmentId ? BigInt(req.body.installmentId) : undefined,
+      amount: body.amount,
+      method: body.method,
+      installmentId: body.installmentId ? BigInt(String(body.installmentId)) : undefined,
       clientId: Number(clientId),
-      reference: req.body.reference,
-      meta: req.body.meta,
+      reference: body.reference,
+      meta: body.meta,
     });
 
     this.created(serializeBigInt(payment));
@@ -89,11 +90,12 @@ export class OperationsController extends BaseController {
 
   async triggerAlert(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const operationId = BigInt(req.params.id);
+    const operationId = BigInt(String(req.params.id));
+    const body = req.body as any;
     const alert = await this.operationsService.triggerAlert(operationId, {
-      type: req.body.type,
-      template: req.body.template,
-      sendAt: req.body.sendAt ? new Date(req.body.sendAt) : undefined,
+      type: body.type,
+      template: body.template,
+      sendAt: body.sendAt ? new Date(body.sendAt) : undefined,
     });
 
     this.created(serializeBigInt(alert));

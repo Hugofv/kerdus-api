@@ -7,6 +7,7 @@ import { PrismaClient } from '@prisma/client';
 import { CreateOperationDto, UpdateOperationDto } from '../dtos/operations.dto';
 import { calculateNextDueDate, roundToTwoDecimals } from '../utils/dateHelpers';
 import { InstallmentStatus } from '../constants/enums';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class OperationsService {
   constructor(private prisma: PrismaClient) {}
@@ -122,8 +123,8 @@ export class OperationsService {
         depositAmount: dto.depositAmount 
           ? (typeof dto.depositAmount === 'string' ? parseFloat(dto.depositAmount) : dto.depositAmount)
           : null,
-        collateralMeta: dto.collateralMeta,
-        meta: dto.meta,
+        collateralMeta: dto.collateralMeta as unknown as InputJsonValue,
+        meta: dto.meta as unknown as InputJsonValue,
         status: dto.status,
         resourceId: dto.resourceId,
         installmentsList: {
@@ -183,7 +184,7 @@ export class OperationsService {
     if (dto.title !== undefined) updateData.title = dto.title;
     if (dto.description !== undefined) updateData.description = dto.description;
     if (dto.status !== undefined) updateData.status = dto.status;
-    if (dto.meta !== undefined) updateData.meta = dto.meta;
+    if (dto.meta !== undefined) updateData.meta = dto.meta as unknown as InputJsonValue;
     if (dto.resourceId !== undefined) updateData.resourceId = dto.resourceId;
     if (dto.dueDate !== undefined) {
       updateData.dueDate = typeof dto.dueDate === 'string' 
@@ -233,7 +234,7 @@ export class OperationsService {
         currency: operation.currency,
         method: paymentData.method,
         reference: paymentData.reference,
-        meta: paymentData.meta,
+        meta: paymentData.meta as unknown as InputJsonValue,
       },
     });
 

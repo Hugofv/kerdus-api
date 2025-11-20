@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
@@ -13,94 +13,149 @@ datasource db {
 // Campos permanecem em camelCase com @map para snake_case no DB.
 
 model PlatformUser {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String   @unique
-  phone        String?
-  passwordHash String?  @map("password_hash")
-  role         String   @default("agent")
-  twoFa        Boolean  @default(false) @map("two_fa")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                   Int       @id @default(autoincrement())
+  name                 String
+  email                String    @unique
+  phone                String?
+  meta                 Json?
+  passwordHash         String?   @map("password_hash")
+  role                 String    @default("agent")
+  twoFa                Boolean   @default(false) @map("two_fa")
+  isActive             Boolean   @default(true) @map("is_active")
+  emailVerifiedAt      DateTime? @map("email_verified_at")
+  lastLoginAt          DateTime? @map("last_login_at")
+  passwordResetToken   String?   @map("password_reset_token")
+  passwordResetExpires DateTime? @map("password_reset_expires")
+  deletedAt            DateTime? @map("deleted_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
-  accounts      Account[]
-  auditLogs     AuditLog[]
-  notifications Notification[]
+  accounts               Account[]        @relation("AccountOwner")
+  createdAccounts        Account[]        @relation("AccountCreator")
+  updatedAccounts        Account[]        @relation("AccountUpdater")
+  createdAddresses       Address[]        @relation("AddressCreator")
+  updatedAddresses       Address[]        @relation("AddressUpdater")
+  createdClients         Client[]         @relation("ClientCreator")
+  updatedClients         Client[]         @relation("ClientUpdater")
+  createdClientPhotos    ClientPhoto[]    @relation("ClientPhotoCreator")
+  updatedClientPhotos    ClientPhoto[]    @relation("ClientPhotoUpdater")
+  createdOperations      Operation[]      @relation("OperationCreator")
+  updatedOperations      Operation[]      @relation("OperationUpdater")
+  createdOperationPhotos OperationPhoto[] @relation("OperationPhotoCreator")
+  updatedOperationPhotos OperationPhoto[] @relation("OperationPhotoUpdater")
+  createdInstallments    Installment[]    @relation("InstallmentCreator")
+  updatedInstallments    Installment[]    @relation("InstallmentUpdater")
+  createdPayments        Payment[]        @relation("PaymentCreator")
+  updatedPayments        Payment[]        @relation("PaymentUpdater")
+  createdResources       Resource[]       @relation("ResourceCreator")
+  updatedResources       Resource[]       @relation("ResourceUpdater")
+  createdAlerts          Alert[]          @relation("AlertCreator")
+  updatedAlerts          Alert[]          @relation("AlertUpdater")
+  createdNotifications   Notification[]   @relation("NotificationCreator")
+  updatedNotifications   Notification[]   @relation("NotificationUpdater")
+  notificationUser       Notification[]   @relation("NotificationUser")
+  createdSettings        Setting[]        @relation("SettingCreator")
+  updatedSettings        Setting[]        @relation("SettingUpdater")
+  auditLogs              AuditLog[]       @relation("AuditLogUser")
 
   @@map("platform_users")
 }
 
 model Account {
-  id         Int      @id @default(autoincrement())
-  name       String
-  phone      String?
-  email      String
-  document   String?
-  status     String   @default("ACTIVE")
-  currency   String   @default("BRL")
-  plan       String?
-  meta       Json?
-  ownerId    Int?     @map("owner_id")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String?
+  email     String
+  document  String?
+  status    String    @default("ACTIVE")
+  currency  String    @default("BRL")
+  plan      String?
+  meta      Json?
+  ownerId   Int?      @map("owner_id")
+  createdBy Int?      @map("created_by")
+  updatedBy Int?      @map("updated_by")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  owner      PlatformUser? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  owner      PlatformUser? @relation("AccountOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  creator    PlatformUser? @relation("AccountCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater    PlatformUser? @relation("AccountUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
   address    Address?
   clients    Client[]
   operations Operation[]
   settings   Setting[]
+  resources  Resource[]
 
   @@map("accounts")
 }
 
 model Address {
-  id           Int     @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   street       String?
   number       String?
   complement   String?
   neighborhood String?
   city         String?
   state        String?
-  country      String? @default("BR")
+  country      String?   @default("BR")
   zip          String?
-  accountId    Int?     @map("account_id")
-  clientId     Int?     @map("client_id")
-  resourceId   Int?     @map("resource_id")
+  accountId    Int?      @unique @map("account_id")
+  clientId     Int?      @unique @map("client_id")
+  resourceId   Int?      @unique @map("resource_id")
+  createdBy    Int?      @map("created_by")
+  updatedBy    Int?      @map("updated_by")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  account   Account?  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  client    Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  resource  Resource? @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  account  Account?      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  client   Client?       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  resource Resource?     @relation("ResourceAddress")
+  creator  PlatformUser? @relation("AddressCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater  PlatformUser? @relation("AddressUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@map("addresses")
 }
 
 model Client {
-  id         Int      @id @default(autoincrement())
-  accountId  Int      @map("account_id")
-  name       String
-  phone      String?
-  email      String?
-  meta       Json?
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id        Int       @id @default(autoincrement())
+  accountId Int       @map("account_id")
+  name      String
+  phone     String?
+  email     String?
+  meta      Json?
+  createdBy Int?      @map("created_by")
+  updatedBy Int?      @map("updated_by")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  address     Address?
-  operations  Operation[]
-  payments    Payment[]
-  photos      ClientPhoto[]
+  account    Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  address    Address?
+  creator    PlatformUser? @relation("ClientCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater    PlatformUser? @relation("ClientUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  operations Operation[]
+  payments   Payment[]
+  photos     ClientPhoto[]
 
   @@map("clients")
 }
 
 model ClientPhoto {
-  id        Int      @id @default(autoincrement())
-  clientId  Int      @map("client_id")
+  id        Int       @id @default(autoincrement())
+  clientId  Int       @map("client_id")
   url       String
   meta      Json?
-  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int?      @map("created_by")
+  updatedBy Int?      @map("updated_by")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client  Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  creator PlatformUser? @relation("ClientPhotoCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater PlatformUser? @relation("ClientPhotoUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@map("client_photos")
 }
@@ -113,41 +168,53 @@ model Operation {
   type            String
   title           String?
   description     String?
-  principalAmount Decimal    @db.Numeric(30, 2) @map("principal_amount")
-  currency        String     @default("BRL")
-  startDate       DateTime   @map("start_date")
-  dueDate         DateTime?  @map("due_date")
+  principalAmount Decimal   @map("principal_amount")
+  currency        String    @default("BRL")
+  startDate       DateTime  @map("start_date")
+  dueDate         DateTime? @map("due_date")
   frequency       String?
-  interestRate    Decimal?   @db.Numeric(10, 4) @map("interest_rate")
-  entryAmount     Decimal?   @db.Numeric(30, 2) @map("entry_amount")
+  interestRate    Decimal?  @map("interest_rate")
+  entryAmount     Decimal?  @map("entry_amount")
   installments    Int?
-  depositAmount   Decimal?   @db.Numeric(30, 2) @map("deposit_amount")
-  collateralMeta  Json?      @map("collateral_meta")
+  depositAmount   Decimal?  @map("deposit_amount")
+  collateralMeta  Json?     @map("collateral_meta")
   meta            Json?
   status          String?
-  resourceId      Int?       @map("resource_id")
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @updatedAt @map("updated_at")
+  resourceId      Int?      @map("resource_id")
+  createdBy       Int?      @map("created_by")
+  updatedBy       Int?      @map("updated_by")
+  deletedAt       DateTime? @map("deleted_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  account          Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  client           Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  installmentsList Installment[] @relation("OperationInstallments")
+  account          Account          @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  client           Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  creator          PlatformUser?    @relation("OperationCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater          PlatformUser?    @relation("OperationUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  installmentsList Installment[]    @relation("OperationInstallments")
   photos           OperationPhoto[]
-  resource         Resource?     @relation(fields: [resourceId], references: [id])
+  resource         Resource?        @relation(fields: [resourceId], references: [id])
   alerts           Alert[]
+  payments         Payment[]
 
   @@map("operations")
 }
 
 // OperationPhoto references operation.id (BigInt)
 model OperationPhoto {
-  id           Int      @id @default(autoincrement())
-  operationId  BigInt   @map("operation_id") @db.BigInt
-  url          String
-  meta         Json?
-  createdAt    DateTime @default(now()) @map("created_at")
+  id          Int       @id @default(autoincrement())
+  operationId BigInt    @map("operation_id") @db.BigInt
+  url         String
+  meta        Json?
+  createdBy   Int?      @map("created_by")
+  updatedBy   Int?      @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  operation    Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  operation Operation     @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  creator   PlatformUser? @relation("OperationPhotoCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater   PlatformUser? @relation("OperationPhotoUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@map("operation_photos")
 }
@@ -157,119 +224,154 @@ model Installment {
   id             BigInt    @id @default(autoincrement()) @db.BigInt
   operationId    BigInt    @map("operation_id") @db.BigInt
   dueDate        DateTime  @map("due_date")
-  amount         Decimal   @db.Numeric(30, 2)
-  principal      Decimal?  @db.Numeric(30, 2)
-  interest       Decimal?  @db.Numeric(30, 2)
+  amount         Decimal
+  principal      Decimal?
+  interest       Decimal?
   status         String    @default("PENDING")
   paidAt         DateTime? @map("paid_at")
-  lateFeePercent Decimal?  @db.Numeric(10, 4) @map("late_fee_percent")
+  lateFeePercent Decimal?  @map("late_fee_percent")
   notes          String?
+  createdBy      Int?      @map("created_by")
+  updatedBy      Int?      @map("updated_by")
+  deletedAt      DateTime? @map("deleted_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  operation      Operation @relation("OperationInstallments", fields: [operationId], references: [id], onDelete: Cascade)
-  payments       Payment[] 
+  operation Operation     @relation("OperationInstallments", fields: [operationId], references: [id], onDelete: Cascade)
+  creator   PlatformUser? @relation("InstallmentCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater   PlatformUser? @relation("InstallmentUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  payments  Payment[]
 
   @@map("installments")
 }
 
 // ------------ PAYMENT (id -> BigInt) ------------
 model Payment {
-  id            BigInt     @id @default(autoincrement()) @db.BigInt
-  clientId      Int        @map("client_id")
-  installmentId BigInt?    @map("installment_id") @db.BigInt
-  operationId   BigInt     @map("operation_id") @db.BigInt
-  amount        Decimal    @db.Numeric(30, 2)
-  currency      String     @default("BRL")
-  paidAt        DateTime   @default(now()) @map("paid_at")
+  id            BigInt    @id @default(autoincrement()) @db.BigInt
+  clientId      Int       @map("client_id")
+  installmentId BigInt?   @map("installment_id") @db.BigInt
+  operationId   BigInt    @map("operation_id") @db.BigInt
+  amount        Decimal
+  currency      String    @default("BRL")
+  paidAt        DateTime  @default(now()) @map("paid_at")
   method        String?
   reference     String?
   meta          Json?
-  createdAt     DateTime   @default(now()) @map("created_at")
+  createdBy     Int?      @map("created_by")
+  updatedBy     Int?      @map("updated_by")
+  deletedAt     DateTime? @map("deleted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  installment  Installment? @relation(fields: [installmentId], references: [id], onDelete: SetNull)
-  operation    Operation    @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  installment Installment?  @relation(fields: [installmentId], references: [id], onDelete: SetNull)
+  operation   Operation     @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  creator     PlatformUser? @relation("PaymentCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater     PlatformUser? @relation("PaymentUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@map("payments")
 }
 
 model Resource {
-  id          Int      @id @default(autoincrement())
-  accountId   Int      @map("account_id")
+  id          Int       @id @default(autoincrement())
+  accountId   Int       @map("account_id")
   type        String
   title       String
   description String?
-  addressId   Int?     @map("address_id")
+  addressId   Int?      @unique @map("address_id")
   photos      Json?
   meta        Json?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   Int?      @map("created_by")
+  updatedBy   Int?      @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  address     Address? @relation(fields: [addressId], references: [id])
-  operations  Operation[]
+  account    Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  address    Address?      @relation("ResourceAddress", fields: [addressId], references: [id], onDelete: SetNull)
+  creator    PlatformUser? @relation("ResourceCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater    PlatformUser? @relation("ResourceUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  operations Operation[]
 
   @@map("resources")
 }
 
 model Alert {
-  id          Int      @id @default(autoincrement())
-  operationId BigInt   @map("operation_id") @db.BigInt
+  id          Int       @id @default(autoincrement())
+  operationId BigInt    @map("operation_id") @db.BigInt
   type        String
   sendAt      DateTime? @map("send_at")
   template    String?
   enabled     Boolean   @default(true)
   meta        Json?
+  createdBy   Int?      @map("created_by")
+  updatedBy   Int?      @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  operation   Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  operation Operation     @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  creator   PlatformUser? @relation("AlertCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater   PlatformUser? @relation("AlertUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@map("alerts")
 }
 
 model Notification {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  title       String
-  body        String
-  channel     String?
-  sentAt      DateTime? @map("sent_at")
-  read        Boolean   @default(false)
-  meta        Json?
-  createdAt   DateTime  @default(now()) @map("created_at")
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  title     String
+  body      String
+  channel   String?
+  sentAt    DateTime? @map("sent_at")
+  read      Boolean   @default(false)
+  meta      Json?
+  createdBy Int?      @map("created_by")
+  updatedBy Int?      @map("updated_by")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  user        PlatformUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    PlatformUser  @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
+  creator PlatformUser? @relation("NotificationCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater PlatformUser? @relation("NotificationUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@map("notifications")
 }
 
 model Setting {
-  id         Int      @id @default(autoincrement())
-  accountId  Int?     @map("account_id")
-  key        String
-  value      Json?
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id        Int       @id @default(autoincrement())
+  accountId Int?      @map("account_id")
+  key       String
+  value     Json?
+  createdBy Int?      @map("created_by")
+  updatedBy Int?      @map("updated_by")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  account    Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account Account?      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  creator PlatformUser? @relation("SettingCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater PlatformUser? @relation("SettingUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@unique([accountId, key])
   @@map("settings")
 }
 
 model AuditLog {
-  id        Int      @id @default(autoincrement())
-  userId    Int?     @map("user_id")
+  id        Int       @id @default(autoincrement())
+  userId    Int?      @map("user_id")
   action    String
   entity    String?
-  entityId  String?  @map("entity_id")
+  entityId  String?   @map("entity_id")
   before    Json?
   after     Json?
   ip        String?
-  createdAt DateTime @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  user      PlatformUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user PlatformUser? @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
 }

@@ -38,14 +38,14 @@ export class ClientsController extends BaseController {
 
   async create(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const client = await this.clientsService.create(req.body);
+    const client = await this.clientsService.create(req.body as any);
     this.created(serializeBigInt(client));
   }
 
   async update(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
     const id = Number(req.params.id);
-    const client = await this.clientsService.update(id, req.body);
+    const client = await this.clientsService.update(id, req.body as any);
     this.ok(serializeBigInt(client));
   }
 

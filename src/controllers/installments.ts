@@ -40,7 +40,7 @@ export class InstallmentsController extends BaseController {
 
   async show(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const id = BigInt(req.params.id);
+    const id = BigInt(String(req.params.id));
     const installment = await this.installmentsService.findById(id);
 
     if (!installment) {
@@ -53,19 +53,20 @@ export class InstallmentsController extends BaseController {
 
   async update(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const id = BigInt(req.params.id);
-    const installment = await this.installmentsService.update(id, req.body);
+    const id = BigInt(String(req.params.id));
+    const installment = await this.installmentsService.update(id, req.body as any);
     this.ok(serializeBigInt(installment));
   }
 
   async markPaid(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const id = BigInt(req.params.id);
+    const id = BigInt(String(req.params.id));
+    const body = req.body as any;
     const installment = await this.installmentsService.markPaid(id, {
-      amount: req.body.amount,
-      method: req.body.method,
-      clientId: req.body.clientId ? Number(req.body.clientId) : undefined,
-      operationId: req.body.operationId ? BigInt(req.body.operationId) : undefined,
+      amount: body.amount,
+      method: body.method,
+      clientId: body.clientId ? Number(body.clientId) : undefined,
+      operationId: body.operationId ? BigInt(String(body.operationId)) : undefined,
     });
 
     this.ok(serializeBigInt(installment));

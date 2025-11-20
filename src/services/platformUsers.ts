@@ -75,7 +75,7 @@ export class PlatformUsersService {
       where,
       include: {
         accounts: true,
-        notifications: true,
+        notificationUser: true,
       },
     });
   }

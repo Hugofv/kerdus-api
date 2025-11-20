@@ -25,8 +25,8 @@ export class InstallmentsService {
     if (status) where.status = status;
     if (dueDateFrom || dueDateTo) {
       where.dueDate = {};
-      if (dueDateFrom) where.dueDate.gte = dueDateFrom;
-      if (dueDateTo) where.dueDate.lte = dueDateTo;
+      if (dueDateFrom) (where.dueDate as any).gte = dueDateFrom;
+      if (dueDateTo) (where.dueDate as any).lte = dueDateTo;
     }
 
     const [data, total] = await Promise.all([

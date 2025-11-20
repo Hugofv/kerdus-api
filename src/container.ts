@@ -15,6 +15,11 @@ export const loadContainer = (app: Application) => {
     prisma: asValue(prisma),
   });
 
+  // Set prisma instance for auth middleware
+  import('./middlewares/auth.middleware').then(({ setPrismaInstance }) => {
+    setPrismaInstance(prisma);
+  });
+
   logger.info('Loading modules...');
   container.loadModules(
     ['services/*.ts', 'controllers/*.ts', 'adapters/*.ts'],

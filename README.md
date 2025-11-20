@@ -144,7 +144,7 @@ npm start
 
 ## 📚 Documentação da API
 
-Consulte o arquivo **[README_API.md](./README_API.md)** para documentação completa dos endpoints, exemplos de requests/responses e códigos de erro.
+Consulte o arquivo **[docs/API.md](./docs/API.md)** para documentação completa dos endpoints, exemplos de requests/responses e códigos de erro.
 
 ### Endpoints Principais
 
@@ -194,7 +194,7 @@ Todos os métodos `delete` implementam **soft delete**:
 - Queries por padrão filtram registros deletados (`deletedAt IS NULL`)
 - Use `includeDeleted: true` para incluir registros deletados
 
-**Nota:** Adicione o campo `deletedAt` aos modelos no Prisma schema (veja [SOFT_DELETE.md](./SOFT_DELETE.md))
+**Nota:** Adicione o campo `deletedAt` aos modelos no Prisma schema (veja [docs/SOFT_DELETE.md](./docs/SOFT_DELETE.md))
 
 ### 3. Serialização de BigInt
 
@@ -214,37 +214,40 @@ Todos os endpoints de listagem suportam paginação:
 
 ## 🔐 Autenticação e Autorização
 
-### Autenticação (Stub)
+O sistema de autenticação utiliza JWT tokens e a tabela `PlatformUser` para todos os tipos de usuários.
 
-O middleware `auth.middleware.ts` atualmente é um stub. Para produção, implemente:
-- Validação de JWT tokens
-- Verificação de sessões
-- Integração com OAuth providers
+**📖 Documentação completa:** [docs/AUTHENTICATION.md](./docs/AUTHENTICATION.md)
 
-**Formato atual (desenvolvimento):**
-```
-Authorization: Bearer userId:role
-```
+### Resumo
 
-### Controle de Acesso
+- **Autenticação:** JWT tokens (access + refresh)
+- **Roles:** Admin, Owner, Agent, Viewer
+- **Admin:** Acesso total à plataforma (não precisa de account)
+- **Owner/Agent/Viewer:** Acesso limitado aos seus accounts
 
-Use os middlewares de role para proteger endpoints:
+### Endpoints de Autenticação
+
+- `POST /api/auth/login` - Login
+- `POST /api/auth/refresh` - Renovar token
+- `GET /api/auth/me` - Dados do usuário
+- `POST /api/auth/logout` - Logout
+- `POST /api/auth/forgot-password` - Solicitar reset
+- `POST /api/auth/reset-password` - Resetar senha
+
+### Middlewares de Autorização
 
 ```typescript
-import { requireRole, requireOwnerOrAdmin } from '../middlewares/role.middleware';
+import { requireAdmin, requireOwnerOrAdmin, requireAccountAccess } from '../middlewares/role.middleware';
 
-// Apenas owner
-router.get('/admin', requireRole('owner'), handler);
+// Apenas admin
+router.get('/admin-only', requireAdmin, handler);
 
 // Owner ou admin
-router.get('/settings', requireOwnerOrAdmin, handler);
-```
+router.get('/owner-admin', requireOwnerOrAdmin, handler);
 
-**Roles disponíveis:**
-- `owner` - Proprietário
-- `admin` - Administrador
-- `agent` - Agente
-- `viewer` - Visualizador
+// Verifica acesso a account
+router.get('/account-data', requireAccountAccess, handler);
+```
 
 ---
 
@@ -356,7 +359,7 @@ npx prisma generate
 
 ### Erro: "deletedAt is not defined"
 
-Adicione o campo `deletedAt` aos modelos no schema Prisma (veja [SOFT_DELETE.md](./SOFT_DELETE.md)) e execute:
+Adicione o campo `deletedAt` aos modelos no schema Prisma (veja [docs/SOFT_DELETE.md](./docs/SOFT_DELETE.md)) e execute:
 ```bash
 npx prisma migrate dev --name add_soft_delete
 npx prisma generate

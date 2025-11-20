@@ -42,9 +42,10 @@ export class AlertsController extends BaseController {
 
   async create(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
+    const body = req.body as any;
     const alert = await this.alertsService.create({
-      ...req.body,
-      operationId: BigInt(req.body.operationId),
+      ...body,
+      operationId: BigInt(String(body.operationId)),
     });
     this.created(serializeBigInt(alert));
   }
@@ -52,7 +53,7 @@ export class AlertsController extends BaseController {
   async update(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
     const id = Number(req.params.id);
-    const alert = await this.alertsService.update(id, req.body);
+    const alert = await this.alertsService.update(id, req.body as any);
     this.ok(serializeBigInt(alert));
   }
 

@@ -36,7 +36,7 @@ export class PaymentsController extends BaseController {
 
   async show(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const id = BigInt(req.params.id);
+    const id = BigInt(String(req.params.id));
     const payment = await this.paymentsService.findById(id);
 
     if (!payment) {

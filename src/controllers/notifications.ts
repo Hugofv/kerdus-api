@@ -39,14 +39,14 @@ export class NotificationsController extends BaseController {
 
   async create(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
-    const notification = await this.notificationsService.create(req.body);
+    const notification = await this.notificationsService.create(req.body as any);
     this.created(serializeBigInt(notification));
   }
 
   async update(req: IReq, res: IRes): Promise<void> {
     this.setResponse(res);
     const id = Number(req.params.id);
-    const notification = await this.notificationsService.update(id, req.body);
+    const notification = await this.notificationsService.update(id, req.body as any);
     this.ok(serializeBigInt(notification));
   }
 
