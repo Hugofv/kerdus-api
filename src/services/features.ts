@@ -7,7 +7,11 @@ import { CreateFeatureDto, UpdateFeatureDto } from '../dtos/features.dto';
 import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class FeaturesService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: { 
     page?: number; 
@@ -47,8 +51,6 @@ export class FeaturesService {
             },
           },
           prices: true, // Include feature prices
-          creator: true,
-          updater: true,
         },
         orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }, { name: 'asc' }],
       }),
@@ -80,8 +82,6 @@ export class FeaturesService {
           },
         },
         prices: true, // Include feature prices
-        creator: true,
-        updater: true,
       },
     });
   }

@@ -7,7 +7,11 @@ import { CreateModuleDto, UpdateModuleDto } from '../dtos/modules.dto';
 import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class ModulesService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: {
     page?: number;

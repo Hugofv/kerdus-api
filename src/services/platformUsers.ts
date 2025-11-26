@@ -24,7 +24,11 @@ export interface UpdatePlatformUserDto {
 }
 
 export class PlatformUsersService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: { page?: number; limit?: number; role?: string; q?: string; includeDeleted?: boolean }) {
     const { page = 1, limit = 20, role, q, includeDeleted = false } = filters;

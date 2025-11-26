@@ -23,7 +23,11 @@ export interface UpdateAlertDto {
 }
 
 export class AlertsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: { page?: number; limit?: number; operationId?: bigint; enabled?: boolean; includeDeleted?: boolean }) {
     const { page = 1, limit = 20, operationId, enabled, includeDeleted = false } = filters;

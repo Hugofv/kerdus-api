@@ -7,7 +7,11 @@ import { CreatePaymentDto } from '../dtos/payments.dto';
 import { InstallmentStatus } from '../constants/enums';
 
 export class PaymentsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   // Type assertion helpers for Prisma models
   private get payment() {

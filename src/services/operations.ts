@@ -10,7 +10,11 @@ import { InstallmentStatus } from '../constants/enums';
 import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class OperationsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   /**
    * Check if account can create more operations based on plan limits

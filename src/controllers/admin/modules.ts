@@ -7,15 +7,14 @@ import { BaseController } from '../../common/BaseController';
 import { ModulesService } from '../../services/modules';
 import { serializeBigInt } from '../../utils/serializeBigInt';
 import { parsePaginationParams } from '../../utils/pagination';
-import { PrismaClient } from '@prisma/client';
 import { getActorFromUser } from '../../utils/audit';
 
 export class AdminModulesController extends BaseController {
   private modulesService: ModulesService;
 
-  constructor({ prisma }: { prisma: PrismaClient }) {
+  constructor({ modulesService }: { modulesService: ModulesService }) {
     super();
-    this.modulesService = new ModulesService(prisma);
+    this.modulesService = modulesService;
   }
 
   async index(req: IReq, res: IRes): Promise<void> {

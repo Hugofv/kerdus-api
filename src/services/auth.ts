@@ -26,7 +26,11 @@ export interface AuthTokens {
 }
 
 export class AuthService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   // Type assertion helper for Prisma models
   private get platformUser() {

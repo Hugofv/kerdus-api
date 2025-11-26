@@ -7,7 +7,11 @@ import { CreateClientDto, UpdateClientDto } from '../dtos/clients.dto';
 import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class ClientsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: { page?: number; limit?: number; accountId?: number; q?: string; includeDeleted?: boolean }) {
     const { page = 1, limit = 20, accountId, q, includeDeleted = false } = filters;
@@ -139,7 +143,7 @@ export class ClientsService {
         ...(addressData && {
           address: {
             create: addressData,
-          },
+      },
         }),
         ...(createdBy && { createdBy }),
       } as any, // Type assertion until migration is applied

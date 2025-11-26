@@ -9,10 +9,26 @@ import { InputJsonValue } from '@prisma/client/runtime/library';
 import bcrypt from 'bcrypt';
 
 export class AccountsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
 
-  async findAll(filters: { page?: number; limit?: number; q?: string; ownerId?: number; includeDeleted?: boolean }) {
-    const { page = 1, limit = 20, q, ownerId, includeDeleted = false } = filters;
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
+
+  async findAll(filters: {
+    page?: number;
+    limit?: number;
+    q?: string;
+    ownerId?: number;
+    includeDeleted?: boolean;
+  }) {
+    const {
+      page = 1,
+      limit = 20,
+      q,
+      ownerId,
+      includeDeleted = false,
+    } = filters;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
@@ -71,7 +87,10 @@ export class AccountsService {
 
   async create(dto: CreateAccountDto, createdBy?: string) {
     // Validate currency
-    if (dto.currency && !Object.values(Currency).includes(dto.currency as Currency)) {
+    if (
+      dto.currency &&
+      !Object.values(Currency).includes(dto.currency as Currency)
+    ) {
       throw new Error(`Invalid currency: ${dto.currency}`);
     }
 
@@ -87,7 +106,9 @@ export class AccountsService {
 
       if (existingOwner) {
         if (existingOwner.deletedAt) {
-          throw new Error('A deleted user with this email exists. Please contact support.');
+          throw new Error(
+            'A deleted user with this email exists. Please contact support.'
+          );
         }
         // Use existing owner
         ownerId = existingOwner.id;
@@ -138,7 +159,10 @@ export class AccountsService {
   }
 
   async update(id: number, dto: UpdateAccountDto) {
-    if (dto.currency && !Object.values(Currency).includes(dto.currency as Currency)) {
+    if (
+      dto.currency &&
+      !Object.values(Currency).includes(dto.currency as Currency)
+    ) {
       throw new Error(`Invalid currency: ${dto.currency}`);
     }
 
@@ -170,4 +194,3 @@ export class AccountsService {
     });
   }
 }
-

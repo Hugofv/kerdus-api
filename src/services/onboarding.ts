@@ -12,12 +12,22 @@ import { UserRole } from '../constants/enums';
 import bcrypt from 'bcrypt';
 
 export class OnboardingService {
-  constructor(
-    private prisma: PrismaClient,
-    private clientsService: ClientsService,
-    private accountsService: AccountsService,
-    private verificationService: VerificationService
-  ) {}
+  private prisma: PrismaClient;
+  private clientsService: ClientsService;
+  private accountsService: AccountsService;
+  private verificationService: VerificationService;
+
+  constructor({ prisma, clientsService, accountsService, verificationService }: {
+    prisma: PrismaClient;
+    clientsService: ClientsService;
+    accountsService: AccountsService;
+    verificationService: VerificationService;
+  }) {
+    this.prisma = prisma;
+    this.clientsService = clientsService;
+    this.accountsService = accountsService;
+    this.verificationService = verificationService;
+  }
 
   /**
    * Save onboarding data - handles progressive data submission

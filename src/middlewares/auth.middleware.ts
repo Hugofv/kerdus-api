@@ -68,7 +68,7 @@ export async function authMiddleware(
       prismaInstance = new PrismaClient();
     }
 
-    const authService = new AuthService(prismaInstance);
+    const authService = new AuthService({ prisma: prismaInstance });
     const decoded = authService.verifyToken(token);
 
     // Load user from database to ensure it's still active

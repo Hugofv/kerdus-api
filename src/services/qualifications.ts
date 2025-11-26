@@ -11,7 +11,11 @@ import {
 import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class QualificationsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: { 
     page?: number; 
@@ -52,8 +56,6 @@ export class QualificationsService {
               name: true,
             },
           },
-          creator: true,
-          updater: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -81,8 +83,6 @@ export class QualificationsService {
       include: {
         account: true,
         client: true,
-        creator: true,
-        updater: true,
       },
     });
   }

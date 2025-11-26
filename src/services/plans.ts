@@ -7,8 +7,10 @@ import { CreatePlanDto, UpdatePlanDto } from '../dtos/plans.dto';
 import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export class PlansService {
-  constructor(private prisma: PrismaClient) {
-    
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
   async findAll(filters: { 
@@ -43,8 +45,6 @@ export class PlansService {
               feature: true,
             },
           },
-          creator: true,
-          updater: true,
         },
         orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
       }),
@@ -81,8 +81,6 @@ export class PlansService {
             name: true,
           },
         },
-        creator: true,
-        updater: true,
       },
     });
   }

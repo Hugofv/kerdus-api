@@ -7,15 +7,14 @@ import { BaseController } from '../../common/BaseController';
 import { QualificationsService } from '../../services/qualifications';
 import { serializeBigInt } from '../../utils/serializeBigInt';
 import { parsePaginationParams } from '../../utils/pagination';
-import { PrismaClient } from '@prisma/client';
 import { getActorFromUser } from '../../utils/audit';
 
 export class AdminQualificationsController extends BaseController {
   private qualificationsService: QualificationsService;
   
-  constructor({ prisma }: { prisma: PrismaClient }) {
+  constructor({ qualificationsService }: { qualificationsService: QualificationsService }) {
     super();
-    this.qualificationsService = new QualificationsService(prisma);
+    this.qualificationsService = qualificationsService;
   }
 
   async index(req: IReq, res: IRes): Promise<void> {

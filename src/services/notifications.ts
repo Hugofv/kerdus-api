@@ -23,7 +23,11 @@ export interface UpdateNotificationDto {
 }
 
 export class NotificationsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: {
     page?: number;

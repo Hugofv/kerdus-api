@@ -7,14 +7,13 @@ import { BaseController } from '../common/BaseController';
 import { SettingsService } from '../services/settings';
 import { serializeBigInt } from '../utils/serializeBigInt';
 import { parsePaginationParams } from '../utils/pagination';
-import { PrismaClient } from '@prisma/client';
 
 export class SettingsController extends BaseController {
   private settingsService: SettingsService;
   
-  constructor({ prisma }: { prisma: PrismaClient }) {
+  constructor({ settingsService }: { settingsService: SettingsService }) {
     super();
-    this.settingsService = new SettingsService(prisma);
+    this.settingsService = settingsService;
   }
 
   async index(req: IReq, res: IRes): Promise<void> {

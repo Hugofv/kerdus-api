@@ -13,7 +13,11 @@ import {
 } from '../dtos/verification.dto';
 
 export class VerificationService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   /**
    * Generate a random verification code

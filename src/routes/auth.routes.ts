@@ -15,7 +15,7 @@ const router = Router();
 // Create controller instance directly (bypassing Awilix for auth routes)
 // This ensures auth routes work even if Awilix has issues resolving the controller
 // Using the shared PrismaClient instance from prisma/client.ts
-const authService = new AuthService(prisma);
+const authService = new AuthService({ prisma });
 const authController = new AuthController(authService);
 
 // Helper to wrap controller methods with error handling

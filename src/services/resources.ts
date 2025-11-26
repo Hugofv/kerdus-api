@@ -26,7 +26,11 @@ export interface UpdateResourceDto {
 }
 
 export class ResourcesService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: { page?: number; limit?: number; accountId?: number; type?: string; includeDeleted?: boolean }) {
     const { page = 1, limit = 20, accountId, type, includeDeleted = false } = filters;

@@ -16,7 +16,11 @@ export interface UpdateSettingDto {
 }
 
 export class SettingsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
+  }
 
   async findAll(filters: { page?: number; limit?: number; accountId?: number; includeDeleted?: boolean }) {
     const { page = 1, limit = 20, accountId, includeDeleted = false } = filters;
