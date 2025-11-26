@@ -12,6 +12,48 @@ import { InputJsonValue } from '@prisma/client/runtime/library';
 export class OperationsService {
   constructor(private prisma: PrismaClient) {}
 
+  /**
+   * Check if account can create more operations based on plan limits
+   */
+  async checkOperationLimit(accountId: number): Promise<{ allowed: boolean; current: number; limit: number | null; message?: string }> {
+    const account = await this.prisma.account.findUnique({
+      where: { id: accountId },
+      include: {
+        plan: true,
+      },
+    });
+
+    if (!account) {
+      throw new Error('Account not found');
+    }
+
+    // Count current operations
+    const currentOperations = await this.prisma.operation.count({
+      where: {
+        accountId,
+        deletedAt: null,
+      },
+    });
+
+    const plan = account.plan;
+    const limit = plan?.maxOperations ?? null;
+
+    if (limit === null) {
+      return { allowed: true, current: currentOperations, limit: null };
+    }
+
+    if (currentOperations >= limit) {
+      return {
+        allowed: false,
+        current: currentOperations,
+        limit,
+        message: `Operation limit reached. Your plan allows ${limit} operations. Please upgrade your plan.`,
+      };
+    }
+
+    return { allowed: true, current: currentOperations, limit };
+  }
+
   async findAll(filters: {
     page?: number;
     limit?: number;
@@ -81,6 +123,12 @@ export class OperationsService {
   }
 
   async create(dto: CreateOperationDto) {
+    // Check plan operation limit
+    const limitCheck = await this.checkOperationLimit(dto.accountId);
+    if (!limitCheck.allowed) {
+      throw new Error(limitCheck.message || 'Operation limit reached');
+    }
+
     const principalAmount = typeof dto.principalAmount === 'string' 
       ? parseFloat(dto.principalAmount) 
       : dto.principalAmount;

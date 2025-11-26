@@ -124,7 +124,7 @@ export class AccountsService {
         document: dto.document,
         status: dto.status || 'ACTIVE',
         currency: dto.currency || Currency.BRL,
-        plan: dto.plan,
+        planId: (dto as any).planId || undefined, // Use planId instead of plan string
         meta: dto.meta as unknown as InputJsonValue,
         ownerId,
         createdBy,
@@ -132,6 +132,7 @@ export class AccountsService {
       include: {
         owner: true,
         address: true,
+        plan: true,
       },
     });
   }
@@ -150,13 +151,13 @@ export class AccountsService {
         document: dto.document,
         status: dto.status,
         currency: dto.currency,
-        plan: dto.plan,
+        planId: dto.planId,
         meta: dto.meta as unknown as InputJsonValue,
-        ownerId: dto.ownerId,
       },
       include: {
         owner: true,
         address: true,
+        plan: true,
       },
     });
   }

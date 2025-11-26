@@ -12,7 +12,7 @@ export const createAccountSchema = z.object({
   document: z.string().optional(),
   status: z.nativeEnum(AccountStatus).default(AccountStatus.ACTIVE),
   currency: z.nativeEnum(Currency).default(Currency.BRL),
-  plan: z.string().optional(),
+  planId: z.number().int().positive().optional(), // Plan ID (replaces plan string)
   meta: z.record(z.unknown()).optional(),
   ownerId: z.number().int().optional(), // If provided, use existing owner
   password: z.string().min(8).optional(), // Required if ownerId is not provided (for auto-creating owner)
@@ -32,7 +32,7 @@ export const updateAccountSchema = z.object({
   document: z.string().optional(),
   status: z.nativeEnum(AccountStatus).optional(),
   currency: z.nativeEnum(Currency).optional(),
-  plan: z.string().optional(),
+  planId: z.number().int().positive().optional(), // Plan ID (replaces plan string)
   meta: z.record(z.unknown()).optional(),
 });
 

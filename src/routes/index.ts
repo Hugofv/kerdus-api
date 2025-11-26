@@ -10,12 +10,15 @@ import notificationsRouter from './notifications.routes';
 import settingsRouter from './settings.routes';
 import platformUsersRouter from './platformUsers.routes';
 import onboardingRouter from './onboarding.routes';
+import plansRouter from './plans.routes';
+import adminRouter from './admin.routes';
 import { authMiddleware } from '../middlewares/auth.middleware';
 
 const routes = Router();
 
 // Public routes (no authentication required)
 routes.use('/onboarding', onboardingRouter);
+routes.use('/plans', plansRouter);
 
 // All other /api/* routes require authentication
 routes.use(authMiddleware);
@@ -31,5 +34,6 @@ routes.use('/alerts', alertsRouter);
 routes.use('/notifications', notificationsRouter);
 routes.use('/settings', settingsRouter);
 routes.use('/platform-users', platformUsersRouter);
+routes.use('/admin', adminRouter);
 
 export default routes;

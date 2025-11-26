@@ -58,6 +58,7 @@ export const onboardingSaveSchema = z.object({
   // Account data (if creating account)
   accountName: z.string().optional(),
   accountEmail: z.string().email().optional(),
+  planId: z.number().int().positive().optional(), // Selected plan
 });
 
 export type OnboardingSaveDto = z.infer<typeof onboardingSaveSchema>;

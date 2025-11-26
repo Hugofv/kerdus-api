@@ -34,6 +34,7 @@ export function requireRole(...allowedRoles: string[]) {
 
 /**
  * Require admin role (platform-wide access, no account needed)
+ * Only users with role === 'admin' can access
  */
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   if (!req.user) {
@@ -44,11 +45,14 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction): v
     return;
   }
 
-  if (!req.user.isAdmin) {
+  // Double check: both isAdmin flag and role must be 'admin'
+  const isAdmin = req.user.isAdmin && req.user.role === UserRole.ADMIN;
+  
+  if (!isAdmin) {
     res.status(HttpStatusCodes.FORBIDDEN).json({
       success: false,
       error: {
-        message: 'Access denied. Admin role required',
+        message: 'Access denied. Admin role required. This endpoint is restricted to administrators only.',
         code: 'FORBIDDEN',
       },
     });

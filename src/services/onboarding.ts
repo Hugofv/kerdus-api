@@ -172,6 +172,7 @@ export class OnboardingService {
           phone: dto.phone?.formattedPhoneNumber || dto.phone?.phoneNumber,
           document: dto.document,
           password: dto.password, // Will be used to create owner
+          planId: dto.planId, // Optional - can be set later
         };
 
         const account = await this.accountsService.create(accountData as any, undefined);

@@ -57,6 +57,12 @@ model PlatformUser {
   createdSettings        Setting[]        @relation("SettingCreator")
   updatedSettings        Setting[]        @relation("SettingUpdater")
   auditLogs              AuditLog[]       @relation("AuditLogUser")
+  createdPlans           Plan[]           @relation("PlanCreator")
+  updatedPlans            Plan[]           @relation("PlanUpdater")
+  createdFeatures         Feature[]        @relation("FeatureCreator")
+  updatedFeatures         Feature[]        @relation("FeatureUpdater")
+  createdLeadQualifications LeadQualification[] @relation("LeadQualificationCreator")
+  updatedLeadQualifications LeadQualification[] @relation("LeadQualificationUpdater")
 
   @@map("platform_users")
 }
@@ -69,7 +75,7 @@ model Account {
   document  String?
   status    String    @default("ACTIVE")
   currency  String    @default("BRL")
-  plan      String?
+  planId    Int?      @map("plan_id")
   meta      Json?
   ownerId   Int?      @map("owner_id")
   createdBy Int?      @map("created_by")
@@ -81,11 +87,13 @@ model Account {
   owner      PlatformUser? @relation("AccountOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   creator    PlatformUser? @relation("AccountCreator", fields: [createdBy], references: [id], onDelete: SetNull)
   updater    PlatformUser? @relation("AccountUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  plan       Plan?         @relation(fields: [planId], references: [id], onDelete: SetNull)
   address    Address?
   clients    Client[]
   operations Operation[]
   settings   Setting[]
   resources  Resource[]
+  qualifications LeadQualification[]
 
   @@map("accounts")
 }
@@ -139,6 +147,7 @@ model Client {
   operations Operation[]
   payments   Payment[]
   photos     ClientPhoto[]
+  qualifications LeadQualification[]
 
   @@map("clients")
 }
@@ -375,4 +384,102 @@ model AuditLog {
   user PlatformUser? @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+// ------------ PLANS & FEATURES ------------
+model Plan {
+  id                Int       @id @default(autoincrement())
+  name              String
+  description       String?
+  price             Decimal   @db.Decimal(10, 2)
+  currency          String    @default("BRL")
+  billingPeriod     String    @default("MONTHLY") // MONTHLY, YEARLY
+  isActive          Boolean   @default(true) @map("is_active")
+  isPublic          Boolean   @default(true) @map("is_public") // Show in public plans
+  sortOrder         Int       @default(0) @map("sort_order")
+  
+  // Limitations
+  maxOperations     Int?      @map("max_operations") // null = unlimited
+  maxClients        Int?      @map("max_clients")
+  maxUsers          Int?      @map("max_users")
+  maxStorage        Int?      @map("max_storage") // in MB, null = unlimited
+  
+  // Feature pricing (per feature)
+  featurePricing    Json?     @map("feature_pricing") // { featureId: price }
+  
+  meta              Json?
+  createdBy         Int?      @map("created_by")
+  updatedBy         Int?      @map("updated_by")
+  deletedAt         DateTime? @map("deleted_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  features          PlanFeature[]
+  accounts          Account[]
+  creator           PlatformUser? @relation("PlanCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater           PlatformUser? @relation("PlanUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@map("plans")
+}
+
+model Feature {
+  id          Int       @id @default(autoincrement())
+  key         String    @unique // e.g., "advanced_reports", "api_access"
+  name        String
+  description String?
+  category    String?   // e.g., "reports", "integrations", "automation"
+  isActive    Boolean   @default(true) @map("is_active")
+  sortOrder   Int       @default(0) @map("sort_order")
+  meta        Json?
+  createdBy   Int?      @map("created_by")
+  updatedBy   Int?      @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  plans       PlanFeature[]
+  creator     PlatformUser? @relation("FeatureCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater     PlatformUser? @relation("FeatureUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@map("features")
+}
+
+model PlanFeature {
+  id        Int       @id @default(autoincrement())
+  planId    Int       @map("plan_id")
+  featureId Int       @map("feature_id")
+  price     Decimal?  @db.Decimal(10, 2) // Override price for this plan, null = use plan's featurePricing
+  isEnabled Boolean   @default(true) @map("is_enabled")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  plan      Plan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feature   Feature   @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureId])
+  @@map("plan_features")
+}
+
+// ------------ LEAD QUALIFICATION ------------
+model LeadQualification {
+  id          Int       @id @default(autoincrement())
+  accountId   Int?      @map("account_id") // null = template question
+  clientId    Int?      @map("client_id") // For client-specific qualifications
+  questionKey String    @map("question_key") // e.g., "business_type", "monthly_operations"
+  question    String
+  answer      Json?     // Can be string, number, array, object
+  score       Int?      // Qualification score (0-100)
+  metadata    Json?     // Additional data
+  createdBy   Int?      @map("created_by")
+  updatedBy   Int?      @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  account     Account?      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  client      Client?       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  creator     PlatformUser? @relation("LeadQualificationCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater     PlatformUser? @relation("LeadQualificationUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@map("lead_qualifications")
 }
