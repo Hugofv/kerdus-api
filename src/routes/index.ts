@@ -11,7 +11,7 @@ import settingsRouter from './settings.routes';
 import platformUsersRouter from './platformUsers.routes';
 import onboardingRouter from './onboarding.routes';
 import plansRouter from './plans.routes';
-import adminRouter from './admin.routes';
+import adminRouter from './admin';
 import { authMiddleware } from '../middlewares/auth.middleware';
 
 const routes = Router();
