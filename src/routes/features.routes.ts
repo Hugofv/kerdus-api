@@ -5,7 +5,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { AdminFeaturesController } from '../controllers/admin/features';
+import { AdminFeaturesController } from '../controllers/admin/featuresController';
 import { requireAdmin } from '../middlewares/role.middleware';
 
 const router = Router();

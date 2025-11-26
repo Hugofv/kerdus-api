@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { AdminQualificationsController } from '../../controllers/admin/qualifications';
+import { AdminQualificationsController } from '../../controllers/admin/qualificationsController';
 import { validate } from '../../middlewares/validation.middleware';
 import {
   createQualificationSchema,
@@ -68,7 +68,11 @@ router.get('/client/:clientId', qualificationsApi('findByClient'));
  *     security:
  *       - bearerAuth: []
  */
-router.post('/', validate(createQualificationSchema), qualificationsApi('create'));
+router.post(
+  '/',
+  validate(createQualificationSchema),
+  qualificationsApi('create')
+);
 
 /**
  * @swagger
@@ -79,7 +83,11 @@ router.post('/', validate(createQualificationSchema), qualificationsApi('create'
  *     security:
  *       - bearerAuth: []
  */
-router.post('/save-answers', validate(saveQualificationAnswersSchema), qualificationsApi('saveAnswers'));
+router.post(
+  '/save-answers',
+  validate(saveQualificationAnswersSchema),
+  qualificationsApi('saveAnswers')
+);
 
 /**
  * @swagger
@@ -90,7 +98,11 @@ router.post('/save-answers', validate(saveQualificationAnswersSchema), qualifica
  *     security:
  *       - bearerAuth: []
  */
-router.put('/:id', validate(updateQualificationSchema), qualificationsApi('update'));
+router.put(
+  '/:id',
+  validate(updateQualificationSchema),
+  qualificationsApi('update')
+);
 
 /**
  * @swagger
@@ -104,4 +116,3 @@ router.put('/:id', validate(updateQualificationSchema), qualificationsApi('updat
 router.delete('/:id', qualificationsApi('delete'));
 
 export default router;
-

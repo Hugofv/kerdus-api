@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { NotificationsController } from '../controllers/notifications';
+import { NotificationsController } from '../controllers/notificationsController';
 
 const router = Router();
 const api = makeInvoker(NotificationsController);

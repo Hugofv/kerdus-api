@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { AuthService } from '../services/auth';
+import { AuthService } from '../services/authService';
 
 export interface AuthenticatedUser {
   id: number;

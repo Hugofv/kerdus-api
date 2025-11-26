@@ -5,7 +5,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { OnboardingController } from '../controllers/onboarding';
+import { OnboardingController } from '../controllers/onboardingController';
 import { validate } from '../middlewares/validation.middleware';
 import { onboardingSaveSchema } from '../dtos/onboarding.dto';
 

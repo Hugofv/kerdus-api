@@ -4,12 +4,9 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { AdminModulesController } from '../../controllers/admin/modules';
+import { AdminModulesController } from '../../controllers/admin/modulesController';
 import { validate } from '../../middlewares/validation.middleware';
-import {
-  createModuleSchema,
-  updateModuleSchema,
-} from '../../dtos/modules.dto';
+import { createModuleSchema, updateModuleSchema } from '../../dtos/modules.dto';
 
 const router = Router();
 const modulesApi = makeInvoker(AdminModulesController);

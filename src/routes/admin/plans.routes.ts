@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { AdminPlansController } from '../../controllers/admin/plans';
+import { AdminPlansController } from '../../controllers/admin/plansController';
 import { validate } from '../../middlewares/validation.middleware';
 import {
   createPlanSchema,

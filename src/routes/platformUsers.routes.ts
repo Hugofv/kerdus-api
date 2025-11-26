@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { PlatformUsersController } from '../controllers/platformUsers';
+import { PlatformUsersController } from '../controllers/platformUsersController';
 import { requireRole } from '../middlewares/role.middleware';
 
 const router = Router();

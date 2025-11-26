@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { InstallmentsController } from '../controllers/installments';
+import { InstallmentsController } from '../controllers/installmentsController';
 import { validate } from '../middlewares/validation.middleware';
 import { updateInstallmentSchema } from '../dtos/installments.dto';
 
@@ -244,4 +244,3 @@ router.patch('/:id', validate(updateInstallmentSchema), api('update'));
 router.patch('/:id/mark-paid', api('markPaid'));
 
 export default router;
-

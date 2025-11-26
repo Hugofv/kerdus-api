@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { PaymentsController } from '../controllers/payments';
+import { PaymentsController } from '../controllers/paymentsController';
 import { validate } from '../middlewares/validation.middleware';
 import { createPaymentSchema } from '../dtos/payments.dto';
 

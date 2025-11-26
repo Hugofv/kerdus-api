@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { AccountsController } from '../controllers/accounts';
+import { AccountsController } from '../controllers/accountsController';
 import { validate } from '../middlewares/validation.middleware';
 import { createAccountSchema, updateAccountSchema } from '../dtos/accounts.dto';
 

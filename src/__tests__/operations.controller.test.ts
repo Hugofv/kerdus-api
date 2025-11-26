@@ -9,17 +9,16 @@
  *   "preset": "ts-jest",
  *   "testEnvironment": "node",
  *   "roots": ["<rootDir>/src"],
- *   "testMatch": ["**/__tests__/**/*.test.ts"]
  * }
  */
 
-import { OperationsController } from '../controllers/operations';
-import { OperationsService } from '../services/operations';
+import { OperationsController } from '../controllers/operationsController';
+import { OperationsService } from '../services/operationsService';
 import { IReq, IRes } from '../common/types';
 import HttpStatusCodes from '../common/HttpStatusCodes';
 
 // Mock the service
-jest.mock('../services/operations');
+jest.mock('../services/operationsService');
 
 describe('OperationsController', () => {
   let controller: OperationsController;

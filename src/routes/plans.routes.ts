@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { PlansController } from '../controllers/plans';
+import { PlansController } from '../controllers/plansController';
 
 const router = Router();
 const api = makeInvoker(PlansController);

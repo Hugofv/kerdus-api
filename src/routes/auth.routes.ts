@@ -6,8 +6,8 @@ import { Router, Request, Response } from 'express';
 import { validate } from '../middlewares/validation.middleware';
 import { loginSchema, refreshTokenSchema, forgotPasswordSchema, resetPasswordSchema } from '../dtos/auth.dto';
 import { authMiddleware } from '../middlewares/auth.middleware';
-import { AuthService } from '../services/auth';
-import { AuthController } from '../controllers/auth';
+import { AuthService } from '../services/authService';
+import { AuthController } from '../controllers/authController';
 import { prisma } from '../prisma/client';
 
 const router = Router();

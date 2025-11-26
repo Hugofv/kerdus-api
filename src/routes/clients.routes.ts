@@ -4,8 +4,8 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { ClientsController } from '../controllers/clients';
-import { VerificationController } from '../controllers/verification';
+import { ClientsController } from '../controllers/clientsController';
+import { VerificationController } from '../controllers/verificationController';
 import { validate } from '../middlewares/validation.middleware';
 import { createClientSchema, updateClientSchema } from '../dtos/clients.dto';
 import {

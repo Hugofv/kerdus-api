@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { makeInvoker } from 'awilix-express';
-import { AdminFeaturesController } from '../../controllers/admin/features';
+import { AdminFeaturesController } from '../../controllers/admin/featuresController';
 import { validate } from '../../middlewares/validation.middleware';
 import {
   createFeatureSchema,
@@ -81,4 +81,3 @@ router.put('/:id', validate(updateFeatureSchema), featuresApi('update'));
 router.delete('/:id', featuresApi('delete'));
 
 export default router;
-
