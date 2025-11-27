@@ -30,8 +30,8 @@ model PlatformUser {
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt @map("updated_at")
 
-  accounts               Account[]        @relation("AccountOwner")
-  notificationUser       Notification[]   @relation("NotificationUser")
+  accounts         Account[]      @relation("AccountOwner")
+  notificationUser Notification[] @relation("NotificationUser")
 
   @@map("platform_users")
 }
@@ -53,15 +53,15 @@ model Account {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  owner      PlatformUser? @relation("AccountOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  plan       Plan?         @relation(fields: [planId], references: [id], onDelete: SetNull)
-  address    Address?
-  clients    Client[]
-  operations Operation[]
-  settings   Setting[]
-  resources  Resource[]
+  owner          PlatformUser?       @relation("AccountOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  plan           Plan?               @relation(fields: [planId], references: [id], onDelete: SetNull)
+  address        Address?
+  clients        Client[]
+  operations     Operation[]
+  settings       Setting[]
+  resources      Resource[]
   qualifications LeadQualification[]
-  featureUsages FeatureUsage[]
+  featureUsages  FeatureUsage[]
 
   @@map("accounts")
 }
@@ -79,15 +79,16 @@ model Address {
   accountId    Int?      @unique @map("account_id")
   clientId     Int?      @unique @map("client_id")
   resourceId   Int?      @unique @map("resource_id")
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
+  createdBy    String?   @map("created_by")
+  updatedBy    String?   @map("updated_by")
   deletedAt    DateTime? @map("deleted_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  account  Account?      @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  client   Client?       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  resource Resource?     @relation("ResourceAddress")
+  account  Account?  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  client   Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  resource Resource? @relation("ResourceAddress")
+
   @@map("addresses")
 }
 
@@ -105,11 +106,11 @@ model Client {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  account    Account?      @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  address    Address?
-  operations Operation[]
-  payments   Payment[]
-  photos     ClientPhoto[]
+  account        Account?            @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  address        Address?
+  operations     Operation[]
+  payments       Payment[]
+  photos         ClientPhoto[]
   qualifications LeadQualification[]
 
   @@map("clients")
@@ -126,7 +127,8 @@ model ClientPhoto {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  client  Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
   @@map("client_photos")
 }
 
@@ -151,8 +153,8 @@ model Operation {
   meta            Json?
   status          String?
   resourceId      Int?      @map("resource_id")
-  createdBy  String?   @map("created_by")
-  updatedBy  String?   @map("updated_by")
+  createdBy       String?   @map("created_by")
+  updatedBy       String?   @map("updated_by")
   deletedAt       DateTime? @map("deleted_at")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
@@ -175,13 +177,14 @@ model OperationPhoto {
   operationId BigInt    @map("operation_id") @db.BigInt
   url         String
   meta        Json?
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
   deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  operation Operation     @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  operation Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+
   @@map("operation_photos")
 }
 
@@ -197,13 +200,13 @@ model Installment {
   paidAt         DateTime? @map("paid_at")
   lateFeePercent Decimal?  @map("late_fee_percent")
   notes          String?
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
+  createdBy      String?   @map("created_by")
+  updatedBy      String?   @map("updated_by")
   deletedAt      DateTime? @map("deleted_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  operation Operation     @relation("OperationInstallments", fields: [operationId], references: [id], onDelete: Cascade)
+  operation Operation @relation("OperationInstallments", fields: [operationId], references: [id], onDelete: Cascade)
   payments  Payment[]
 
   @@map("installments")
@@ -221,15 +224,16 @@ model Payment {
   method        String?
   reference     String?
   meta          Json?
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
+  createdBy     String?   @map("created_by")
+  updatedBy     String?   @map("updated_by")
   deletedAt     DateTime? @map("deleted_at")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  installment Installment?  @relation(fields: [installmentId], references: [id], onDelete: SetNull)
-  operation   Operation     @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  client      Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  installment Installment? @relation(fields: [installmentId], references: [id], onDelete: SetNull)
+  operation   Operation    @relation(fields: [operationId], references: [id], onDelete: Cascade)
+
   @@map("payments")
 }
 
@@ -242,14 +246,14 @@ model Resource {
   addressId   Int?      @unique @map("address_id")
   photos      Json?
   meta        Json?
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
   deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  account    Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  address    Address?      @relation("ResourceAddress", fields: [addressId], references: [id], onDelete: SetNull)
+  account    Account     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  address    Address?    @relation("ResourceAddress", fields: [addressId], references: [id], onDelete: SetNull)
   operations Operation[]
 
   @@map("resources")
@@ -263,13 +267,14 @@ model Alert {
   template    String?
   enabled     Boolean   @default(true)
   meta        Json?
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
   deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  operation Operation     @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  operation Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+
   @@map("alerts")
 }
 
@@ -288,7 +293,7 @@ model Notification {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  user    PlatformUser  @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
+  user PlatformUser @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }
@@ -304,7 +309,7 @@ model Setting {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  account Account?      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@unique([accountId, key])
   @@map("settings")
@@ -328,31 +333,31 @@ model AuditLog {
 
 // ------------ PLANS & FEATURES ------------
 model Plan {
-  id                Int       @id @default(autoincrement())
-  name              String
-  description       String?
-  billingPeriod     String    @default("MONTHLY") // MONTHLY, YEARLY
-  isActive          Boolean   @default(true) @map("is_active")
-  isPublic          Boolean   @default(true) @map("is_public") // Show in public plans
-  sortOrder         Int       @default(0) @map("sort_order")
-  
-  // Limitations
-  maxOperations     Int?      @map("max_operations") // null = unlimited
-  maxClients        Int?      @map("max_clients")
-  maxUsers          Int?      @map("max_users")
-  maxStorage        Int?      @map("max_storage") // in MB, null = unlimited
-  
-  // Note: Plan price is calculated from sum of enabled feature prices per currency
-  
-  meta              Json?
-  createdBy    String?   @map("created_by")
-  updatedBy    String?   @map("updated_by")
-  deletedAt         DateTime? @map("deleted_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  id            Int     @id @default(autoincrement())
+  name          String
+  description   String?
+  billingPeriod String  @default("MONTHLY") // MONTHLY, YEARLY
+  isActive      Boolean @default(true) @map("is_active")
+  isPublic      Boolean @default(true) @map("is_public") // Show in public plans
+  sortOrder     Int     @default(0) @map("sort_order")
 
-  features          PlanFeature[]
-  accounts          Account[]
+  // Limitations
+  maxOperations Int? @map("max_operations") // null = unlimited
+  maxClients    Int? @map("max_clients")
+  maxUsers      Int? @map("max_users")
+  maxStorage    Int? @map("max_storage") // in MB, null = unlimited
+
+  // Note: Plan price is calculated from sum of enabled feature prices per currency
+
+  meta      Json?
+  createdBy String?   @map("created_by")
+  updatedBy String?   @map("updated_by")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  features PlanFeature[]
+  accounts Account[]
 
   @@map("plans")
 }
@@ -362,7 +367,7 @@ model Feature {
   key         String    @unique // e.g., "advanced_reports", "api_access"
   name        String
   description String?
-  category    String?   // e.g., "reports", "integrations", "automation"
+  category    String? // e.g., "reports", "integrations", "automation"
   moduleId    Int?      @map("module_id")
   isActive    Boolean   @default(true) @map("is_active")
   sortOrder   Int       @default(0) @map("sort_order")
@@ -373,8 +378,8 @@ model Feature {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  module     Module?        @relation(fields: [moduleId], references: [id], onDelete: SetNull)
-  plans      PlanFeature[]
+  module Module?       @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  plans  PlanFeature[]
 
   @@map("features")
 }
@@ -385,7 +390,7 @@ model Module {
   key         String    @unique // e.g., "loan", "rent_room", "rent_house", "rent_vehicle"
   name        String
   description String?
-  category    String?   // e.g., "real_estate", "lending"
+  category    String? // e.g., "real_estate", "lending"
   isActive    Boolean   @default(true) @map("is_active")
   sortOrder   Int       @default(0) @map("sort_order")
   meta        Json?
@@ -395,25 +400,25 @@ model Module {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  features   Feature[]
+  features Feature[]
 
   @@map("modules")
 }
 
 model PlanFeature {
-  id            Int       @id @default(autoincrement())
-  planId        Int       @map("plan_id")
-  featureId     Int       @map("feature_id")
-  isEnabled     Boolean   @default(true) @map("is_enabled")
+  id             Int      @id @default(autoincrement())
+  planId         Int      @map("plan_id")
+  featureId      Int      @map("feature_id")
+  isEnabled      Boolean  @default(true) @map("is_enabled")
   operationLimit Int?     @map("operation_limit") // Max operations allowed for this feature in this plan (null = unlimited)
-  resetPeriod   String    @default("LIFETIME") @map("reset_period") // MONTHLY, YEARLY, LIFETIME
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  resetPeriod    String   @default("LIFETIME") @map("reset_period") // MONTHLY, YEARLY, LIFETIME
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  plan      Plan      @relation(fields: [planId], references: [id], onDelete: Cascade)
-  feature   Feature   @relation(fields: [featureId], references: [id], onDelete: Cascade)
-  prices    PlanFeaturePrice[] // Multiple prices for different currencies
-  usages    FeatureUsage[]
+  plan    Plan               @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feature Feature            @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  prices  PlanFeaturePrice[] // Multiple prices for different currencies
+  usages  FeatureUsage[]
 
   @@unique([planId, featureId])
   @@map("plan_features")
@@ -421,13 +426,13 @@ model PlanFeature {
 
 // ------------ PLAN FEATURE PRICING (Multi-currency) ------------
 model PlanFeaturePrice {
-  id            Int       @id @default(autoincrement())
-  planFeatureId Int       @map("plan_feature_id")
-  currency      String    // e.g., "BRL", "USD", "EUR"
-  price         Decimal   @db.Decimal(10, 2) // Price in this currency
-  isDefault     Boolean   @default(false) @map("is_default") // Default price for this currency
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id            Int      @id @default(autoincrement())
+  planFeatureId Int      @map("plan_feature_id")
+  currency      String // e.g., "BRL", "USD", "EUR"
+  price         Decimal  @db.Decimal(10, 2) // Price in this currency
+  isDefault     Boolean  @default(false) @map("is_default") // Default price for this currency
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   planFeature PlanFeature @relation(fields: [planFeatureId], references: [id], onDelete: Cascade)
 
@@ -437,14 +442,14 @@ model PlanFeaturePrice {
 
 // ------------ FEATURE USAGE TRACKING ------------
 model FeatureUsage {
-  id            Int       @id @default(autoincrement())
-  accountId     Int       @map("account_id")
-  planFeatureId Int       @map("plan_feature_id")
-  operationId   BigInt    @map("operation_id") @db.BigInt
-  usageDate     DateTime  @default(now()) @map("usage_date")
-  period        String    @map("period") // e.g., "2024-01" for monthly tracking
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id            Int      @id @default(autoincrement())
+  accountId     Int      @map("account_id")
+  planFeatureId Int      @map("plan_feature_id")
+  operationId   BigInt   @map("operation_id") @db.BigInt
+  usageDate     DateTime @default(now()) @map("usage_date")
+  period        String   @map("period") // e.g., "2024-01" for monthly tracking
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   account     Account     @relation(fields: [accountId], references: [id], onDelete: Cascade)
   planFeature PlanFeature @relation(fields: [planFeatureId], references: [id], onDelete: Cascade)
@@ -461,17 +466,17 @@ model LeadQualification {
   clientId    Int?      @map("client_id") // For client-specific qualifications
   questionKey String    @map("question_key") // e.g., "business_type", "monthly_operations"
   question    String
-  answer      Json?     // Can be string, number, array, object
-  score       Int?      // Qualification score (0-100)
-  metadata    Json?     // Additional data
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
+  answer      Json? // Can be string, number, array, object
+  score       Int? // Qualification score (0-100)
+  metadata    Json? // Additional data
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
   deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  account     Account?      @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  client      Client?       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  account Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  client  Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("lead_qualifications")
 }

@@ -18,11 +18,11 @@ export interface OperationTypeMapping {
   [key: string]: string; // operation type -> module key
 }
 
-// Default mapping: Operation type to Module key
+// Default mapping: Operation type to Module key (UPPERCASE)
 const DEFAULT_OPERATION_TYPE_MAPPING: OperationTypeMapping = {
-  LOAN: 'loan',
-  RENTAL: 'rent_room', // Default rental, can be overridden by meta
-  OTHER: 'other',
+  LOAN: 'LOAN',
+  RENTAL: 'RENT_ROOM', // Default rental, can be overridden by meta
+  OTHER: 'OTHER',
 };
 
 export class FeatureAuthorizationService {

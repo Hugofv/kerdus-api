@@ -309,7 +309,7 @@ export class PlansService {
           },
         },
       },
-      orderBy: [{ sortOrder: 'asc' }, { price: 'asc' }],
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
     });
 
     // Simple scoring algorithm - can be enhanced
@@ -332,8 +332,12 @@ export class PlansService {
         score += 5;
       }
 
+      // Calculate prices for the plan
+      const calculatedPrices = this.calculatePlanPrices(plan);
+
       return {
         ...plan,
+        prices: calculatedPrices,
         recommendationScore: score,
       };
     });
